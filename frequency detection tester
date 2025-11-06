@@ -1,0 +1,51 @@
+let mic, fft;
+let angleOffset = 0;
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  angleMode(DEGREES);
+  colorMode(HSB, 360, 255, 255, 255);
+  mic = new p5.AudioIn();
+  mic.start();
+  fft = new p5.FFT();
+  fft.setInput(mic);
+  noStroke();
+  frameRate(60);
+}
+
+function draw() {
+  background(0, 20);
+  translate(width / 2, height / 2);
+  angleOffset += 0.5;
+
+  let spectrum = fft.analyze();
+  
+  // Custom frequency ranges to better capture general sound
+  let low = fft.getEnergy(60, 400);       // Bass → lower mids
+  let high = fft.getEnergy(1500, 10000);  // Upper mids → treble
+
+  // Frequency balance determines color: red (high) → blue (low)
+  let freqBalance = high / (low + high + 1);
+  let hue = lerp(240, 0, freqBalance); // 240 (blue) → 0 (red)
+
+  // Fixed heart size (no volume-based growth)
+  let radiusBase = 150;
+
+  drawHeart(radiusBase, hue);
+}
+
+function drawHeart(size, hue) {
+  fill(hue, 255, 255, 180);
+  beginShape();
+  for (let a = 0; a < 360; a += 1) {
+    let r = size * (16 * pow(sin(a), 3));
+    let x = r;
+    let y = -size * (13 * cos(a) - 5 * cos(2 * a) - 2 * cos(3 * a) - cos(4 * a));
+    vertex(x / 15, y / 15);
+  }
+  endShape(CLOSE);
+}
+
+function keyPressed() {
+  fullscreen(!fullscreen());
+}
