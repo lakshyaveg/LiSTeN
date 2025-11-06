@@ -1,0 +1,166 @@
+let mic, fft;
+let smoothedPulse = 0;
+let userImg = null;
+let useHeart = true;
+let fileInput;
+
+let rotateEnabled = false;
+let rotationAngle = 0;
+
+let bounceEnabled = false;
+let posX, posY;
+let velX, velY;
+
+let showInstructions = true; // controls both text + file input
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  angleMode(DEGREES);
+  colorMode(HSB, 360, 255, 255, 255);
+  noStroke();
+
+  mic = new p5.AudioIn();
+  mic.start();
+  mic.amp(2.0);
+
+  fft = new p5.FFT(0.5, 1024);
+  fft.setInput(mic);
+
+  fileInput = createFileInput(handleFile);
+  fileInput.position(20, 20);
+  fileInput.style("color", "white");
+  fileInput.style("font-size", "14px");
+  fileInput.attribute("accept", "image/png");
+
+  posX = width / 2;
+  posY = height / 2;
+  velX = random(3, 6);
+  velY = random(3, 6);
+}
+
+function draw() {
+  background(0, 25);
+
+  // Update bounce
+  if (bounceEnabled) {
+    posX += velX;
+    posY += velY;
+
+    let shpSize = 300 * smoothedPulse;
+    let halfSize = shpSize / 2;
+
+    if (posX + halfSize > width || posX - halfSize < 0) velX *= -1;
+    if (posY + halfSize > height || posY - halfSize < 0) velY *= -1;
+  } else {
+    posX = width / 2;
+    posY = height / 2;
+  }
+
+  push();
+  translate(posX, posY);
+
+  // Apply rotation
+  if (rotateEnabled) {
+    rotationAngle += 1;
+    rotate(rotationAngle);
+  }
+
+  let level = mic.getLevel();
+  let targetPulse = map(level, 0, 0.2, 0.3, 1.8, true);
+  smoothedPulse = lerp(smoothedPulse, targetPulse, 0.15);
+
+  let baseHue = (frameCount * 2) % 360;
+
+  if (useHeart) {
+    drawHeart(baseHue);
+  } else if (userImg) {
+    drawUserImage(baseHue);
+  }
+  pop();
+
+  if (showInstructions) drawInstructions();
+}
+
+function drawHeart(baseHue) {
+  for (let g = 3; g >= 0; g--) {
+    let glowScale = 10 + g * 6;
+    let alpha = 120 - g * 30;
+    let hue = (baseHue + g * 15) % 360;
+    fill(hue, 255, 255, alpha);
+
+    beginShape();
+    for (let angle = 0; angle < 360; angle += 2) {
+      let x = 16 * pow(sin(angle), 3);
+      let y =
+        13 * cos(angle) -
+        5 * cos(2 * angle) -
+        2 * cos(3 * angle) -
+        cos(4 * angle);
+      x *= glowScale * smoothedPulse * 0.6;
+      y *= -glowScale * smoothedPulse * 0.6;
+      vertex(x, y);
+    }
+    endShape(CLOSE);
+  }
+}
+
+function drawUserImage(baseHue) {
+  let imgSize = 300 * smoothedPulse;
+  let tintHue = (baseHue + 30) % 360;
+  tint(tintHue, 255, 255, 220);
+  imageMode(CENTER);
+  image(userImg, 0, 0, imgSize, imgSize);
+}
+
+function handleFile(file) {
+  if (file.type === "image" && file.subtype === "png") {
+    userImg = loadImage(file.data, () => {
+      useHeart = false;
+    });
+  } else {
+    alert("Please upload a PNG image!");
+  }
+}
+
+function keyPressed() {
+  if (keyCode === ENTER) {
+    useHeart = true;
+    userImg = null;
+  } else if (key === 'R' || key === 'r') {
+    rotateEnabled = !rotateEnabled;
+  } else if (key === 'B' || key === 'b') {
+    bounceEnabled = !bounceEnabled;
+    if (bounceEnabled) {
+      velX = random(3, 6) * (random() > 0.5 ? 1 : -1);
+      velY = random(3, 6) * (random() > 0.5 ? 1 : -1);
+    }
+  } else if (key === 'E' || key === 'e') {
+    showInstructions = !showInstructions;
+    // Toggle visibility of the file input as well
+    if (showInstructions) {
+      fileInput.show();
+    } else {
+      fileInput.hide();
+    }
+  } else {
+    let fs = !fullscreen();
+    fullscreen(fs);
+    resizeCanvas(windowWidth, windowHeight);
+  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
+function drawInstructions() {
+  resetMatrix();
+  fill(255);
+  textAlign(LEFT, TOP);
+  textSize(14);
+  text(
+    "Upload a PNG image to replace the heart.\nPress ENTER to keep the heart.\nPress R to toggle rotation.\nPress B to toggle bouncing.\nPress E to hide/show instructions and upload button.\nPress any other key for fullscreen.",
+    20,
+    height - 130
+  );
+}
