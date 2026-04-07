@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.11/lib/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.11/lib/addons/p5.sound.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <meta charset="utf-8" />
+  </head>
+
+  <body>
+    <main></main>
+
+    <!-- 1) Namespace -->
+    <script src="LSTN_Namespace.js"></script>
+
+    <!-- 2) Audio (split for SRP) -->
+    <script src="LSTN_AudioInput.js"></script>
+    <script src="LSTN_SpectrumAnalyzer.js"></script>
+    <script src="LSTN_PulseEstimator.js"></script>
+
+    <!-- 3) Core visuals -->
+    <script src="LSTN_VisualElement.js"></script>
+    <script src="LSTN_Shape.js"></script>
+    <script src="LSTN_UserImage.js"></script>
+
+    <!-- 4) State + controllers -->
+    <script src="LSTN_AppState.js"></script>
+    <script src="LSTN_MotionController.js"></script>
+    <script src="LSTN_RotationController.js"></script>
+    <script src="LSTN_BackgroundManager.js"></script>
+    <script src="LSTN_InstructionOverlay.js"></script>
+    <script src="LSTN_VisualElementManager.js"></script>
+    <script src="LSTN_ImageLoader.js"></script>
+    <script src="LSTN_DisplayManager.js"></script>
+    <script src="LSTN_UIController.js"></script>
+
+    <!-- 5) Advanced Editor -->
+    <script src="LSTN_CanvasItem.js"></script>
+    <script src="LSTN_AdvancedEditor.js"></script>
+
+    <!-- 6) Input routing (split for SRP) -->
+    <script src="LSTN_KeyBindings.js"></script>
+    <script src="LSTN_AppCommands.js"></script>
+    <script src="LSTN_InputController.js"></script>
+
+    <!-- 7) App composition + runtime -->
+    <script src="LSTN_AppBootstrapper.js"></script>
+    <script src="LSTN_VisualizerApp.js"></script>
+
+    <!-- 8) p5 sketch entrypoint (must come last) -->
+    <script src="main.js"></script>
+  </body>
+</html>
